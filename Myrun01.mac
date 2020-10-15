@@ -1,0 +1,25 @@
+#
+# limit the step size from histos 1 and 8
+#
+/control/saveHistory
+/control/verbose 2
+/run/verbose 2
+#
+/testem/phys/addPhysics  empenelope	# em physics
+###/testem/phys/addPhysics  emlivermore	# em physics
+###/testem/phys/addPhysics  empenelope	# em physics
+#
+/run/initialize
+#
+#/gun/particle e-
+#/gun/energy 100 keV
+#/gun/particle ion
+#/gun/ion 39 90
+#/gun/energy 0 keV
+#
+#
+/run/printProgress 10000
+#
+
+/gun/energy 50 keV
+/run/beamOn 100000
