@@ -43,7 +43,7 @@ void steppingaction::UserSteppingAction(const G4Step *step)
     auto partname = atrack->GetParticleDefinition()->GetParticleName();
     //det ID, convenient to store for post-analysis
     G4int iDet=-1;
-    if (stepVol->GetName()=="Sample") iDet=1;
+    if (stepVol->GetName()=="Sample" || stepVol->GetName()=="Sample1" || stepVol->GetName()=="Sample2") iDet=1;
     if (stepVol->GetName()=="Ge") iDet=2;
     if (stepVol->GetName()=="Core") {
         //G4cout<<"Core\n"<<G4endl;

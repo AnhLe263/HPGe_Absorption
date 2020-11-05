@@ -30,6 +30,8 @@ class GammaSource : public G4VUserPrimaryGeneratorAction
     G4ParticleGun*  fParticleGun; // pointer a to G4 gun class
 
     GammaSpectroScpy* fDet;
+    G4bool isTranmissionMethod;
+    G4bool isRandomDirection;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

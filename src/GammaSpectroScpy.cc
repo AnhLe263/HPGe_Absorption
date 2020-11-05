@@ -45,8 +45,8 @@ G4VPhysicalVolume* GammaSpectroScpy::Construct()
   //     
   // World
   //
-  G4double world_sizeXY = 15.*cm;
-  G4double world_sizeZ  = 15.*cm;
+  G4double world_sizeXY = 25.*cm;
+  G4double world_sizeZ  = 30.*cm;
   G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
   gal_mat = nist->FindOrBuildMaterial("G4_Galactic");
   
@@ -54,7 +54,7 @@ G4VPhysicalVolume* GammaSpectroScpy::Construct()
     new G4Box("World",                       //its name
        0.5*world_sizeXY, 0.5*world_sizeXY, 0.5*world_sizeZ);     //its size
       
-  G4LogicalVolume* logicWorld =                         
+  logicWorld =                         
     new G4LogicalVolume(solidWorld,          //its solid
                         world_mat,           //its material
                         "World");            //its name
@@ -80,6 +80,10 @@ G4VPhysicalVolume* GammaSpectroScpy::Construct()
         Mau_Logic = new G4LogicalVolume(Mau_Solid,sample_mat,"Sample");
         fSamplePosZ = -(fHSurrounding/2. + fHmau/2.) + fDistaneSD;
         new G4PVPlacement(0,G4ThreeVector(0,0,fSamplePosZ),Mau_Logic,"Sample",logicWorld,false,0,true);
+    }
+
+    if (isMarinelli) {
+      ModellingMirinelli450();
     }
   //
   //always return the physical World
@@ -187,6 +191,7 @@ G4LogicalVolume* GammaSpectroScpy::ModellingHPGe()
 void GammaSpectroScpy::SetUserCylindralSample(G4double hmau,G4double dmau,G4double distance,G4String matName)
 {
     isCylindral = true;
+    isMarinelli = false;
     fHmau = hmau;
     fDmau = dmau;
     fDistaneSD = distance;
@@ -196,4 +201,71 @@ void GammaSpectroScpy::SetUserCylindralSample(G4double hmau,G4double dmau,G4doub
         G4cout<<"Wrong matname\n";
         exit(0);
     }
+}
+
+void GammaSpectroScpy::SetUserMarinelliSample(G4double hmau,G4String matName)
+{
+
+  isMarinelli = true;
+  isCylindral = false;
+  fHmau = hmau;
+  fDistaneSD = 0;
+    G4NistManager* nist = G4NistManager::Instance(); 
+    sample_mat = nist->FindOrBuildMaterial(matName);
+    if (!sample_mat) {
+        G4cout<<"Wrong matname\n";
+        exit(0);
+    }
+}
+
+void GammaSpectroScpy::ModellingMirinelli450() 
+{
+  //refer from  10.1016/S0969-8043(00)00308-0
+
+  G4double H1 = 104.1*mm;
+  G4double H2 = 68.33*mm;
+  G4double l = 77.4*mm;
+  W = 14.83*mm;
+  G4double t1 = 1.9*mm;
+  G4double t2 = 2.*mm;
+  t3 = 3.6*mm;
+  G4double Hlow = H2+t1;
+  G4double Hhigh = H1 - Hlow;
+  G4double D = l + 2.*(t1+W+t2);
+  G4NistManager* nist = G4NistManager::Instance(); 
+  G4Material* plastic_mat = nist->FindOrBuildMaterial("G4_POLYETHYLENE");
+  // lowerpart
+  G4Tubs *lowerpart_Solid = new G4Tubs("lowerpartMerinelli",l/2.,D/2.,Hlow/2.,0.*deg,360.*deg);
+  G4double lowerpart_posZ = -(fDistaneSD+fHSurrounding/2)+Hlow/2-t1;
+  G4LogicalVolume* lowerpart_Logic = new G4LogicalVolume(lowerpart_Solid,plastic_mat,"lowerpartMerinelli");
+  new G4PVPlacement(0,G4ThreeVector(0,0,lowerpart_posZ),lowerpart_Logic,"lowerpartMerinelli",logicWorld,false,0,true);
+  //day cua beaker, cham voi encap
+  G4Tubs *bottom_Solid = new G4Tubs("bottomMerinelli",0.,l/2.,t1/2.,0.*deg,360.*deg);
+  G4double bottom_posZ = -(fDistaneSD+fHSurrounding/2)-t1/2.;
+  G4LogicalVolume* bottom_Logic = new G4LogicalVolume(bottom_Solid,plastic_mat,"bottomMerinelli");
+  new G4PVPlacement(0,G4ThreeVector(0,0,bottom_posZ),bottom_Logic,"bottomMerinelli",logicWorld,false,0,true);
+  //sample in lower part
+  G4Tubs *Sample1_Solid = new G4Tubs("Sample1",l/2.+t1,l/2+t1+W,(Hlow-t3)/2.,0.*deg,360.*deg);
+  G4double Sample1_posZ = -Hlow/2. + (Hlow-t3)/2.;
+  G4LogicalVolume* Sample1_Logic = new G4LogicalVolume(Sample1_Solid,sample_mat,"Sample1");
+  new G4PVPlacement(0,G4ThreeVector(0,0,Sample1_posZ),Sample1_Logic,"Sample1",lowerpart_Logic,false,0,true);
+
+  //high part
+  G4Tubs *highpart_Solid = new G4Tubs("highpartMerinelli",0,D/2.,fHmau/2.,0.*deg,360.*deg);
+  G4double highpart_posZ = -(fDistaneSD+fHSurrounding/2)-t1 - fHmau/2;
+  G4LogicalVolume* highpart_Logic = new G4LogicalVolume(highpart_Solid,plastic_mat,"highpartMerinelli");
+  new G4PVPlacement(0,G4ThreeVector(0,0,highpart_posZ),highpart_Logic,"highpartMerinelli",logicWorld,false,0,true);
+
+  G4Tubs *Sample2_Solid = new G4Tubs("Sample2",0,D/2.-t2,fHmau/2.,0.*deg,360.*deg);
+  G4double Sample2_posZ = 0.*mm;
+  G4LogicalVolume* Sample2_Logic = new G4LogicalVolume(Sample2_Solid,sample_mat,"Sample2");
+  new G4PVPlacement(0,G4ThreeVector(0,0,Sample2_posZ),Sample2_Logic,"Sample2",highpart_Logic,false,0,true);
+
+  fV1Mirinelli =  Sample2_Solid->GetCubicVolume();
+  fV2Mirinelli =  Sample1_Solid->GetCubicVolume();
+  fSamplePosZ = -fHSurrounding/2 - t1;
+  fHmau2 = Hlow;
+  fDmau = (D/2.-t2)*2.;
+  fDmau2 = fDmau;
+  G4cout<<"The Tich: "<<fV1Mirinelli<<"\t"<<fV2Mirinelli<<G4endl;
 }

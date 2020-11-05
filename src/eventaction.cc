@@ -18,7 +18,8 @@ void eventaction::BeginOfEventAction(const G4Event *)
 void eventaction::EndOfEventAction(const G4Event *)
 {
    // Store information
-    if (fTotalDepositE > 0.) {
+    //if (fTotalDepositE > 0.) 
+    {
         G4AnalysisManager* analysisManager=G4AnalysisManager::Instance();
         G4double CorrectedE = fTotalDepositE - fTotalReleasEOfelectron;
         analysisManager->FillNtupleDColumn(0,fTotalStepLength);

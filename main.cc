@@ -71,9 +71,13 @@ int main(int argc,char** argv)
   //
   // Detector construction
   GammaSpectroScpy* det = new GammaSpectroScpy();
-  G4double hmau = 20.*mm;
-  G4double dmau = 70.*mm;
-  det->SetUserCylindralSample(hmau,dmau);
+  G4double hmau = 100.*mm;
+  G4double dmau = 53.*mm;
+  //det->SetUserCylindralSample(hmau,dmau,0,"G4_CALCIUM_CARBONATE");
+  //det->SetUserCylindralSample(hmau,dmau);
+  //det->SetUserMarinelliSample(30.*mm,"G4_SILICON_DIOXIDE");
+  det->SetUserMarinelliSample(10.*mm,"G4_CALCIUM_CARBONATE");
+  //det->SetUserMarinelliSample(30.*mm);
   runManager->SetUserInitialization(det);
 
   // Physics list
